@@ -1,201 +1,105 @@
-# Ringkasan Lengkap Konsep OOP pada Project CarRentalFX
+Berikut script penjelasan OOP saja, dengan lokasi file yang jelas. Kamu bisa baca ini sambil rekam.
 
-Dokumen ini menjelaskan penerapan konsep Object-Oriented Programming (OOP) dalam proyek ini secara komprehensif.
+---
 
-> **Catatan:** Hampir seluruh kode dalam proyek ini berbasis OOP karena Java adalah bahasa OOP. Namun, proyek ini lebih mengutamakan **Encapsulation** dan **Composition** dibandingkan Inheritance yang dalam.
+## 1. Enkapsulasi (Encapsulation)
 
-## 1. Encapsulation (Enkapsulasi) - *Sangat Dominan*
-Enkapsulasi adalah pembungkusan data dan metode dalam satu unit (class) serta menyembunyikan detail implementasi. Ini adalah konsep yang paling banyak digunakan di proyek ini.
+“Pertama, saya terapkan enkapsulasi di layer model dan DAO.
 
-*   **Penerapan:** Semua class Model (`User`, `Mobil`, `Konsumen`, `Transaksi`, `Petugas`) menggunakan variabel `private` dan method `public` (getter/setter).
-*   **Tujuan:** Melindungi data agar tidak diubah sembarangan dan mempermudah pemeliharaan.
-*   **Contoh 1 (User):** `src/main/java/rentalmobil/model/User.java`
+Di paket `rentalmobil.model`, misalnya di file `rentalmobil/model/User.java`, semua atribut seperti `idUser`, `username`, `password`, `namaLengkap`, `level`, dan `photoPath` bertipe `private`. Akses ke field-field ini tidak langsung, tapi melalui method getter dan setter, seperti `getIdUser()`, `setPassword()`, `getNamaLengkap()`, dan seterusnya.
+
+Pola yang sama juga ada di `rentalmobil/model/Konsumen.java` untuk field `noKTP`, `namaKonsumen`, `tempatTinggal`, dan `nomorTelepon`, dan juga di `rentalmobil/model/Mobil.java`, `Merek.java`, serta `Transaksi.java`. Dengan cara ini data di dalam objek terlindungi dan hanya bisa diubah lewat method yang sudah saya sediakan.
+
+Di paket `rentalmobil.dao` seperti `rentalmobil/dao/KonsumenDao.java` dan `rentalmobil/dao/MobilDao.java`, saya juga menerapkan enkapsulasi terhadap akses database. Detail koneksi dan SQL ada di dalam method seperti `find(...)`, `getAll()`, dan `upsert(...)`, sehingga bagian lain aplikasi tidak berinteraksi langsung dengan `Connection` atau `PreparedStatement`, tapi hanya memanggil method DAO-nya.”
+
+---
+
+## 2. Inheritance dan `super()` (Pewarisan)
+
+“Untuk konsep inheritance atau pewarisan, saya gunakan di hierarki user.
+
+Class dasar atau superclass‑nya adalah `User` yang ada di file `rentalmobil/model/User.java`. Di class ini saya simpan atribut umum semua pengguna, seperti `idUser`, `username`, `password`, `namaLengkap`, dan `level`.
+
+Kemudian saya buat dua subclass: `Admin` dan `Petugas` di paket yang sama.  
+`Admin` ada di `rentalmobil/model/Admin.java` dan dideklarasikan sebagai:
 
 ```java
-public class User {
-    private String username; // Data private
+public class Admin extends User { ... }
+```
 
-    public String getUsername() { // Akses public
-        return username;
-    }
+`Petugas` ada di `rentalmobil/model/Petugas.java` dengan deklarasi:
+
+```java
+public class Petugas extends User { ... }
+```
+
+Di kedua subclass ini, constructor memanggil constructor milik `User` menggunakan keyword `super`. Contohnya di `Admin`:
+
+```java
+public Admin(int idUser, String username, String password, String namaLengkap) {
+    super(idUser, username, password, namaLengkap, "ADMIN");
 }
 ```
 
-*   **Contoh 2 (Konsumen):** `src/main/java/rentalmobil/model/Konsumen.java`
+dan di `Petugas`:
 
 ```java
-public class Konsumen {
-    private String noKTP;
-    private String namaKonsumen;
-
-    public String getNoKTP() {
-        return noKTP;
-    }
-
-    public void setNoKTP(String noKTP) {
-        this.noKTP = noKTP;
-    }
+public Petugas(int idUser, String username, String password, String namaLengkap) {
+    super(idUser, username, password, namaLengkap, "PETUGAS");
 }
 ```
 
-## 2. Inheritance (Pewarisan) - *Digunakan Sesuai Kebutuhan*
-Pewarisan memungkinkan sebuah class mewarisi sifat dari class lain. Dalam proyek ini, pewarisan digunakan terutama untuk integrasi dengan framework JavaFX.
+Jadi di sini jelas terlihat pemakaian inheritance (`extends User`) dan pemanggilan `super(...)` di constructor untuk menginisialisasi bagian yang diwarisi dari `User`.”
 
-*   **Penerapan Utama:** Class `App` mewarisi `Application` dari JavaFX.
-*   **File:** `src/main/java/com/mycompany/carrentalfx/App.java`
-*   **Catatan:** Proyek ini menghindari hierarki pewarisan yang dalam (deep inheritance) untuk menjaga kode tetap sederhana.
+---
 
-```java
-public class App extends Application { ... }
-```
+## 3. Overloading (Polimorfisme Statis)
 
-## 3. Polymorphism (Polimorfisme)
-Kemampuan objek atau method untuk memiliki banyak bentuk.
+“Untuk overloading, saya gunakan terutama di constructor.
 
-### a. Method Overriding (Menimpa Method)
-Mengubah perilaku method yang diwarisi dari parent class.
-*   **Contoh:** `App.java` menimpa method `start()` dari class `Application`.
-*   **Contoh:** `Merek.java` menimpa method `toString()` dari class `Object` untuk menampilkan nama merek saat objek ini dimasukkan ke ComboBox.
-    *   **File:** `src/main/java/rentalmobil/model/Merek.java`
+Contoh pertama ada di `rentalmobil/model/User.java`. Di class `User` saya punya beberapa constructor dengan parameter berbeda: constructor kosong, constructor dengan parameter `(idUser, username, password, namaLengkap, level)`, dan satu constructor lagi yang menambahkan `photoPath`. Nama constructornya sama, tapi daftar parameternya berbeda, ini yang disebut constructor overloading.
 
-```java
-@Override
-public String toString() {
-    return namaMerek;
-}
-```
+Contoh kedua ada di `rentalmobil/model/Konsumen.java`. Konsumen punya constructor kosong `Konsumen()`, dan constructor lengkap `Konsumen(String noKTP, String namaKonsumen, String tempatTinggal, String nomorTelepon)`. Dengan adanya beberapa bentuk constructor, saya bisa membuat objek dengan data minimal maupun dengan data lengkap sesuai kebutuhan.”
 
-### b. Method Overloading (Overloading Method)
-Membuat beberapa method dengan nama sama tapi parameter berbeda.
-*   **Penerapan:** Constructor pada class Model.
-*   **Contoh (User, beberapa constructor):** `src/main/java/rentalmobil/model/User.java`
+*(kalau kamu ingin, sebut juga constructor tambahan yang kamu lihat di file Konsumen sekarang)*
 
-```java
-public class User {
-    public User() {
-    }
+---
 
-    public User(int idUser, String username, String password,
-                String namaLengkap, String level) {
-        this.idUser = idUser;
-        this.username = username;
-        this.password = password;
-        this.namaLengkap = namaLengkap;
-        this.level = level;
-    }
-}
-```
+## 4. Overriding & Polymorphism Dinamis
 
-## 4. Abstraction (Abstraksi)
-Menyembunyikan kerumitan implementasi dan menampilkan fungsionalitas sederhana.
+“Untuk overriding, saya implementasikan di beberapa class model.
 
-*   **Layer DAO (Data Access Object):** `MobilDao`, `UserDao`, `MerekDao` dll. menyembunyikan kompleksitas query SQL. Controller tidak perlu tahu sintaks SQL.
-*   **Contoh DAO (MobilDao.getAll):** `src/main/java/rentalmobil/dao/MobilDao.java`
+Di `rentalmobil/model/Merek.java` dan `rentalmobil/model/Mobil.java`, saya override method `toString()` yang diwarisi dari `Object`. Di `Merek`, `toString()` saya ubah supaya mengembalikan `namaMerek`, dan di `Mobil`, `toString()` saya ubah supaya menampilkan kombinasi merek, nama mobil, dan plat nomor. Ini membuat objek bisa langsung ditampilkan dengan teks yang lebih informatif di combobox atau tabel.
 
-```java
-public List<Mobil> getAll() throws SQLException {
-    String sql = "SELECT m.*, mr.namaMerek FROM mobil m "
-               + "LEFT JOIN merek mr ON m.idMerek=mr.idMerek "
-               + "ORDER BY m.idMobil DESC";
-    try (Connection c = DB.getConnection();
-         Statement st = c.createStatement();
-         ResultSet rs = st.executeQuery(sql)) {
-        List<Mobil> list = new ArrayList<>();
-        while (rs.next()) {
-            list.add(map(rs));
-        }
-        return list;
-    }
-}
-```
+Di hierarki user, saya juga override method `getRoleDescription()`.  
+Method dasarnya ada di `User` (`rentalmobil/model/User.java`) yang mengembalikan `"User"`.  
+Kemudian di `Admin` (`rentalmobil/model/Admin.java`) saya override menjadi `"Admin"`, dan di `Petugas` (`rentalmobil/model/Petugas.java`) saya override menjadi `"Petugas"`. Ini contoh overriding di dalam inheritance.
 
-*   **Layer Service:** `RentalService` menyembunyikan logika bisnis yang rumit (validasi, hitung denda) dari Controller.
-*   **Contoh Service (sewaMobil):** `src/main/java/rentalmobil/service/RentalService.java`
+Polymorphism dinamis muncul di service login. Di file `rentalmobil/service/AuthService.java`, method `login(String username, String password)` selalu mengembalikan tipe `User`, tetapi di dalamnya, kalau level di database adalah `ADMIN` saya buat objek `Admin`, dan kalau levelnya `PETUGAS` saya buat objek `Petugas`. Jadi dari luar, variabelnya bertipe `User`, tapi objek konkretnya bisa Admin atau Petugas, dan method yang di‑override seperti `getRoleDescription()` akan mengikuti tipe objek sebenarnya. Itu yang disebut polymorphism.”
 
-```java
-public int sewaMobil(String noKTP, String nama, String alamat, String telp,
-                     int idMobil, int idUserPetugas,
-                     LocalDate tglSewa, LocalDate tglRencana)
-        throws SQLException {
-    konsumenDao.upsert(new Konsumen(noKTP, nama, alamat, telp));
-    Mobil m = mobilDao.findById(idMobil);
-    // validasi dan perhitungan total bayar
-    int id = transaksiDao.insert(t);
-    mobilDao.setStatus(idMobil, "DISEWA");
-    return id;
-}
-```
+---
 
-## 5. Composition (Komposisi) - *Pola Struktur Utama*
-Alih-alih menggunakan pewarisan (Inheritance), proyek ini menggunakan Komposisi ("Has-A Relationship"). Ini adalah praktik OOP modern yang disarankan.
+## 5. Abstraction & Layering (Model – DAO – Service)
 
-*   **Penerapan:** Controller *memiliki* (has-a) instance dari DAO atau Service.
-*   **Contoh 1 (DashboardController):** `src/main/java/com/mycompany/carrentalfx/DashboardController.java`
+“Untuk abstraksi, saya memisahkan beberapa layer.
 
-```java
-public class DashboardController {
-    private final MobilDao mobilDao = new MobilDao();
-    private final KonsumenDao konsumenDao = new KonsumenDao();
-    private final TransaksiDao transaksiDao = new TransaksiDao();
-}
-```
+Layer model di paket `rentalmobil.model` hanya berisi representasi data dan sedikit logic lokal. Layer DAO di paket `rentalmobil.dao` seperti `KonsumenDao`, `MobilDao`, `UserDao`, dan `TransaksiDao` menyembunyikan detail akses database di dalam method‑method publik, sehingga bagian lain hanya tahu fungsi seperti `getAll()`, `find()`, `insert()`, atau `getMonthlyDetails(...)`.
 
-*   **Contoh 2 (RentalService):** `src/main/java/rentalmobil/service/RentalService.java`
+Di atasnya ada layer service, misalnya `rentalmobil/service/RentalService.java`, yang menyatukan beberapa operasi DAO menjadi satu proses bisnis, seperti `sewaMobil(...)` dan `prosesPengembalian(...)`. Cara ini menunjukkan penerapan konsep abstraksi dan pemisahan tanggung jawab antar class.”
 
-```java
-public class RentalService {
-    private final MobilDao mobilDao = new MobilDao();
-    private final KonsumenDao konsumenDao = new KonsumenDao();
-    private final TransaksiDao transaksiDao = new TransaksiDao();
-}
-```
+---
 
-## 6. Static & Nested Classes (Kelas Statis & Bersarang)
-Penggunaan fitur OOP lanjutan untuk pengorganisasian kode.
+## 6. Association / Composition (HAS‑A)
 
-*   **Static Method (Utility Pattern):**
-    *   `DB.java`: Menggunakan method `static` agar bisa dipanggil tanpa objek `new DB()`.
-    *   `PrintUtil.java`: Class ini berisi method `static void printText(...)` untuk mencetak struk, tanpa perlu menyimpan state/data.
-*   **Nested Class (Inner Class):** `TransaksiDao` memiliki class `MonthlyIncome` di dalamnya (`public static class`).
+“Terakhir, untuk hubungan antar objek yang bukan pewarisan, saya gunakan association atau composition.
 
-## 7. Peta Seluruh File & Peran OOP-nya
-Berikut adalah daftar lengkap file dalam proyek dan peran OOP masing-masing, sehingga Anda bisa melihat bahwa **semua kode** memiliki tempatnya dalam konsep OOP.
+Misalnya, di `rentalmobil/model/Transaksi.java`, class `Transaksi` punya field `idMobil`, `noKTP`, dan `idUserPetugas`. Artinya satu transaksi berhubungan dengan satu mobil, satu konsumen, dan satu petugas, tapi `Transaksi` bukan turunan dari `Mobil` atau `Konsumen`. Jadi di sini relasinya adalah **has‑a**, bukan `extends`.
 
-### A. Model (Representasi Objek Nyata)
-Semua file ini menggunakan **Encapsulation**.
-*   `User.java`: Objek Pengguna sistem.
-*   `Konsumen.java`: Objek Penyewa mobil.
-*   `Mobil.java`: Objek Mobil yang disewakan.
-*   `Merek.java`: Objek Merek mobil (menggunakan **Polymorphism** pada `toString`).
-*   `Transaksi.java`: Objek Transaksi penyewaan.
-*   `Petugas.java`: Objek khusus Petugas (sederhana).
+Begitu juga di `rentalmobil/service/RentalService.java`, service ini memiliki field `MobilDao`, `KonsumenDao`, dan `TransaksiDao`. Service tersebut menggunakan objek‑objek DAO itu untuk menjalankan proses bisnis. Ini contoh komposisi di level service.”
 
-### B. DAO (Data Access Object - Abstraksi Data)
-Semua file ini menggunakan **Abstraction** untuk menyembunyikan SQL.
-*   `UserDao.java`, `KonsumenDao.java`, `MobilDao.java`, `MerekDao.java`, `TransaksiDao.java`, `PetugasDao.java`.
+---
 
-### C. Service (Logika Bisnis - Abstraksi Proses)
-Menggabungkan beberapa DAO untuk melakukan satu tugas bisnis yang kompleks.
-*   `AuthService.java`: Menangani logika login.
-*   `RentalService.java`: Menangani logika penyewaan dan pengembalian (menghitung denda, cek stok).
+Kalau kamu baca script ini pelan‑pelan, kamu sudah menjawab:
 
-### D. Controller (Penghubung UI & Logika)
-Menggunakan **Composition** untuk memanggil Service/DAO.
-*   `App.java`: Entry point (**Inheritance** dari JavaFX).
-*   `LoginController.java`: Mengontrol tampilan login.
-*   `DashboardController.java`: Mengontrol menu utama.
-*   `PrimaryController.java`, `SecondaryController.java`: Navigasi dasar.
-*   `MobilViewController.java`, `KonsumenViewController.java`, `TransaksiViewController.java`, `LaporanViewController.java`, `PetugasViewController.java`: Mengelola tampilan CRUD masing-masing fitur.
-*   `MobilPickerController.java`: Dialog pemilihan mobil.
-*   `ProfileController.java`: Dialog edit profil.
-
-### E. Utility & Config
-*   `DB.java`: Konfigurasi Database (**Static** pattern).
-*   `PrintUtil.java`: Alat bantu cetak (**Static** method pattern).
-
-## Kesimpulan
-Tidak ada kode yang "terbuang" atau "bukan OOP".
-1.  **Class Model** menyimpan data (State).
-2.  **Class Controller** menangani interaksi (Behavior).
-3.  **Class DAO/Service** menangani logika dan data persistance.
-Semuanya bekerja sama sebagai objek-objek yang saling berinteraksi.
+- OOP apa saja yang dipakai (enkapsulasi, inheritance + super, overloading, overriding, polymorphism, abstraksi, dan association).
+- Letak kodenya ada di file mana saja di dalam proyek.
