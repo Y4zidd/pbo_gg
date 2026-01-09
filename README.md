@@ -31,19 +31,6 @@ Folder ini berisi dashboard admin untuk pengelolaan sistem.
 
 ---
 
-Table master
-
-- users
-- cars
-- locations
-- bookings
-- booking_options
-- payments
-- rental_partners
-- car_images
-- coupons
-- user_verification_codes
-
 ## 2. Metode Penghubung Backend dan Frontend
 
 Meskipun folder Frontend (`user` dan `user/admin`) dan Backend (`backend`) terpisah, mereka terhubung melalui protokol **HTTP RESTful API**.
