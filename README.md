@@ -131,3 +131,16 @@ A: Di database tabel `users` ada kolom `role`. Saat login, sistem mengecek role 
 
 **Q: Kenapa pakai Next.js untuk Admin tapi React Vite untuk User?**
 A: (Ini asumsi strategi) Next.js memiliki fitur Server-Side Rendering (SSR) dan routing yang kuat yang bagus untuk dashboard yang kompleks dan butuh performa SEO/Loading awal yang baik. React Vite sangat cepat untuk pengembangan Single Page Application (SPA) yang interaktif seperti sisi user.
+
+table master
+
+- users
+- cars
+- locations
+- bookings
+- booking_options
+- payments
+- rental_partners
+- car_images
+- coupons
+- user_verification_codes
